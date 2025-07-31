@@ -53,6 +53,10 @@ start:
     ; read from disk to test
     mov [ebr_drive_number], dl
 
+    mov si, msg_loading ; print loading message, this works
+    call puts
+
+
     ; read drive parameters to reg
     push es
     mov ah, 08h
@@ -87,19 +91,21 @@ start:
     inc ax ; division remained !=0, add 1, sector will be only partially filled
 
 .root_dir_after:
-
+   
     ; read root dir
     mov cl, al ; cl = size of root dir
     pop ax ; get LBA of root dir
     mov dl, [ebr_drive_number] ; dl = drive num
     mov bx, buffer ; es:bx = buffer
-    call disk_read
+
+    call disk_read ; THIS LINE IS GONNA GIVE ME A MIGRAINE ITS FUCKING EVERYTHING UP
 
     ; search for kernel.bin
     xor bx, bx
     mov di, buffer
 
 .search_kernel:
+
     mov si, file_kernel_bin ; move name of kernel file into mem
     mov cx, 11 ; compare 11 chars
     push di ; save di because cmpsb will change it
@@ -167,6 +173,7 @@ start:
     and ax, 0x0FFF ; if low 12, mask
 
 .next_cluster_after:
+
     cmp ax, 0x0FF8
     jae .read_finish
 
@@ -184,7 +191,9 @@ start:
     mov ds, ax
     mov es, ax
 
-    jmp KERNEL_LOAD_SEGMENT:KERNEL_LOAD_OFFSET  fucking finally holy shit
+    jmp KERNEL_LOAD_SEGMENT:KERNEL_LOAD_OFFSET ; fucking finally holy shit
+    ; i am losing my mind why does this not work what the hell is an fpu exception
+    ; FUCK THIS
 
     jmp wait_for_key_reboot ; please don't run this line please don't run this line please don't run this line
 
@@ -324,6 +333,7 @@ disk_read:
     pop cx
     pop bx
     pop ax
+    ret ; oh my fucking god i never returned thats why it wasn't working my dumbass
 ;
 ; Reset disk controlller
 ; dl: drive number
@@ -336,10 +346,11 @@ disk_reset:
     jc floppy_error ; print error if flag doesnt clear
     popa
     ret
-;
+
 msg_failed_read: db 'Failed to read from disk', ENDL, 0
-msg_kernel_not_found: db 'Loaded, kernel not found', ENDL, 0
+msg_kernel_not_found: db 'Kernel not found', ENDL, 0
 file_kernel_bin: db 'KERNEL  BIN'
+msg_loading: db 'Loading...', ENDL, 0
 kernel_cluster: dw 0
 
 KERNEL_LOAD_SEGMENT equ 0x2000
@@ -348,4 +359,4 @@ KERNEL_LOAD_OFFSET equ 0
 times 510-($-$$) db 0     ; Pad with zeros so total size is 510 bytes before signature
 dw 0AA55h                 ; Boot signature (0xAA55), required for BIOS to boot
 
-buffer: 
+buffer:
