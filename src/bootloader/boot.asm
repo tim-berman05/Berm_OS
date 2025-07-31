@@ -97,8 +97,7 @@ start:
     pop ax ; get LBA of root dir
     mov dl, [ebr_drive_number] ; dl = drive num
     mov bx, buffer ; es:bx = buffer
-
-    call disk_read ; THIS LINE IS GONNA GIVE ME A MIGRAINE ITS FUCKING EVERYTHING UP
+    call disk_read
 
     ; search for kernel.bin
     xor bx, bx
@@ -263,14 +262,18 @@ puts:   ;prints a string to the screen
 
 lba_to_chs:
 
+    ; i fucked this up so bad somehow but i fixed it
+
     push ax
     push dx
 
-    xor dx, dx ; resource efficient way to set to 0    mov dl, [ebr_drive_number]
-    mov bx, buffer
-    mov ax, [bdb_reserved_sectors]
-    mov cl, [bdb_sectors_per_fat]
-    call disk_read
+    xor dx, dx ; resource efficient way to set to 0
+    div word [bdb_sectors_per_track] ; ax = LBA/SectorsPerTrack, dx = LBA % SectorsPerTrack
+
+    inc dx ; dx = (LBA % SectorsPerTrack + 1) = sector, 0 based indexing
+    mov cx, dx ; cx = sector
+
+    xor dx, dx
     div word [bdb_heads] ; set ax to (LBA / SectorsPerTrack) / Heads, dx to (LBA / SectorsPerTrack) % Heads
                             ; ax = cylinder, dx = heads
     mov dh, dl ; dh = head
