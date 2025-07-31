@@ -1,0 +1,5 @@
+/build/tools/fat
+/build/bootloader.bin
+/build/kernel.bin
+/build/main_floppy.img
+/build/main.bin
