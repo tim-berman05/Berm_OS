@@ -95,13 +95,13 @@ start:
     ; read root dir
     mov cl, al ; cl = size of root dir
     pop ax ; get LBA of root dir
-    mov dl, [ebr_drive_number] ; dl = drive num
     mov bx, buffer ; es:bx = buffer
+    mov dl, [ebr_drive_number] ; dl = drive num
     call disk_read
 
     ; search for kernel.bin
-    xor bx, bx
     mov di, buffer
+    xor bx, bx
 
 .search_kernel:
 
@@ -210,7 +210,7 @@ floppy_error:
     jmp wait_for_key_reboot
 
 kernel_not_found_err:
-    mov si, msg_kernel_not_found
+    mov si, msg_secondStage_not_found
     call puts
     jmp wait_for_key_reboot
 
@@ -351,8 +351,8 @@ disk_reset:
     ret
 
 msg_failed_read: db 'Failed to read from disk', ENDL, 0
-msg_kernel_not_found: db 'Kernel not found', ENDL, 0
-file_kernel_bin: db 'KERNEL  BIN'
+msg_secondStage_not_found: db 'Second stage not found', ENDL, 0
+file_kernel_bin: db 'STAGE2  BIN'
 msg_loading: db 'Loading...', ENDL, 0
 kernel_cluster: dw 0
 
