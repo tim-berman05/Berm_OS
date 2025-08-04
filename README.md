@@ -17,7 +17,8 @@ make clean - deletes the build folder, preps for rebuilding
   *empty in the repo, contains binary files for running
 
   Dependencies
-  - nasm is default assembler
+  - NASM assembler syntax
   - qemu is default for running the floppy image
   - bochs is default for debugging
-  - gcc is default c compiler, not integrated yet
+  - GCC is default C compiler, C is not integrated yet
+  - Need to figure out 16-bit real mode compiling
